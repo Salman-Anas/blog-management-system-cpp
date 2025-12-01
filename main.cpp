@@ -1,35 +1,41 @@
 #include <iostream>
-#include <vector>
 #include <string>
 #include <cgicc/Cgicc.h>
 #include <cgicc/HTTPHTMLHeader.h>
 #include <cgicc/HTMLClasses.h>
-#include "include/Database.h" // Include your new class
+#include "include/Database.h"
+#include "include/SessionManager.h" // Include new header
 
 using namespace std;
 using namespace cgicc;
 
 int main() {
-    // 1. Always print the header first or the browser will show a 500 error
-    cout << HTTPHTMLHeader() << endl;
-    cout << html() << head(title("Database Test")) << body() << endl;
-
-    // 2. Test the connection
+    Cgicc cgi; // Helper to read input/cookies
     Database db;
-    cout << h1("System Diagnostics") << endl;
-    
-    if (db.connect()) {
-        cout << p("Database Connection: ") << b("SUCCESS") << style("color:green") << endl;
+    db.connect();
+    SessionManager session(&db);
+
+    // CHECK IF LOGGED IN
+    int userId = session.checkSession(cgi);
+
+    // If no session exists, let's create a fake one just for testing (User ID 1)
+    if (userId == 0) {
+        HTTPCookie newCookie = session.createSession(1);
         
-        // Optional: Test a quick query
-        MYSQL_RES* res = db.select("SELECT DATABASE()");
-        if (res) {
-             MYSQL_ROW row = mysql_fetch_row(res);
-             cout << p("Connected to schema: " + string(row[0])) << endl;
-        }
+        // IMPORTANT: Cookies must be set in the HEADER
+        cout << HTTPHTMLHeader().setCookie(newCookie) << endl;
+        
+        cout << html() << head(title("Session Test")) << body() << endl;
+        cout << h1("Session Created") << endl;
+        cout << p("No session found. I have created a new session for User ID 1.") << endl;
+        cout << p("Refresh the page to see if the session persists.") << endl;
     } else {
-        cout << p("Database Connection: ") << b("FAILED") << style("color:red") << endl;
-        cout << p("Check your username/password in Database.h") << endl;
+        // If session exists
+        cout << HTTPHTMLHeader() << endl;
+        cout << html() << head(title("Session Test")) << body() << endl;
+        cout << h1("Welcome Back!") << endl;
+        cout << p("Session Valid. Your User ID is: " + to_string(userId)) << style("color:green") << endl;
+        cout << p("Because you refreshed, the timeout timer has been reset (SR2).") << endl;
     }
 
     cout << body() << html() << endl;
