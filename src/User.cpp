@@ -72,3 +72,20 @@ bool User::load(int userId) {
     
     return true;
 }
+
+
+bool User::createUser(string username, string password, string email, string role) {
+    // 1. Sanitize inputs (SR6)
+    string cleanUser = db->sanitize(username);
+    string cleanEmail = db->sanitize(email);
+    string cleanRole = db->sanitize(role);
+
+    // 2. Hash the password (SR5)
+    string hashedPassword = hashPassword(password);
+
+    // 3. Insert into DB
+    string query = "INSERT INTO users (username, password_hash, email, role) VALUES ('" 
+                   + cleanUser + "', '" + hashedPassword + "', '" + cleanEmail + "', '" + cleanRole + "')";
+    
+    return db->execute(query);
+}

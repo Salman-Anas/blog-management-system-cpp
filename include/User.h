@@ -31,6 +31,8 @@ public:
     
     // Helper to get user details by ID
     bool load(int userId);
+
+    bool createUser(string username, string password, string email, string role);
 };
 
 #endif
