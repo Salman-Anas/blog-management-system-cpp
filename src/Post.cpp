@@ -40,3 +40,14 @@ void Post::ratePost(int postId, int change) {
     string query = "UPDATE posts SET rating = rating + (" + to_string(change) + ") WHERE id = " + to_string(postId);
     db->execute(query);
 }
+
+
+bool Post::createPost(int userId, string title, string content) {
+    string cleanTitle = db->sanitize(title);
+    string cleanContent = db->sanitize(content);
+
+    string query = "INSERT INTO posts (user_id, title, content) VALUES (" 
+                   + to_string(userId) + ", '" + cleanTitle + "', '" + cleanContent + "')";
+    
+    return db->execute(query);
+}

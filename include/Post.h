@@ -29,6 +29,8 @@ public:
 
     // FR2: Uprate or Downrate a post
     void ratePost(int postId, int change); // change is +1 or -1
+
+    bool createPost(int userId, string title, string content);
 };
 
 #endif
