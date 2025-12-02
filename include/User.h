@@ -33,6 +33,9 @@ public:
     bool load(int userId);
 
     bool createUser(string username, string password, string email, string role);
+
+    void set2FACode(int userId, string code);
+    bool verify2FACode(int userId, string inputCode);
 };
 
 #endif

@@ -32,17 +32,24 @@ int main() {
         int userId = user.authenticate(u_name, u_pass);
 
         if (userId > 0) {
-            // SUCCESS: Create Session and Redirect (SR3, SR4)
-            HTTPCookie cookie = session.createSession(userId);
+            // SUCCESS STEP 1: Credentials Valid
             
-            // FIX: Use the specific Redirect Header class
-            HTTPRedirectHeader redirect("dashboard.cgi");
-            redirect.setCookie(cookie);
+            // 1. Generate 6-digit random code
+            srand(time(0));
+            string code = to_string(100000 + rand() % 900000); // 100000 to 999999
+
+            // 2. Save code and "Send Email"
+            user.set2FACode(userId, code);
+
+            // 3. Set a temporary cookie just to remember the UserID for the next step
+            // We do NOT create a session yet.
+            HTTPCookie tempCookie("PRE_AUTH_USER", to_string(userId));
+            
+            HTTPRedirectHeader redirect("verify.cgi");
+            redirect.setCookie(tempCookie);
             
             cout << redirect << endl;
             return 0;
-        } else {
-            error_msg = "Invalid username or password.";
         }
     }
 
