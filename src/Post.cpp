@@ -9,8 +9,6 @@ Post::~Post() {}
 
 vector<BlogPost> Post::getAllPosts() {
     vector<BlogPost> posts;
-    
-    // Join with users table to get the username instead of just user_id
     string query = "SELECT p.id, p.title, p.content, p.rating, u.username "
                    "FROM posts p "
                    "JOIN users u ON p.user_id = u.id "
@@ -33,7 +31,6 @@ vector<BlogPost> Post::getAllPosts() {
 }
 
 void Post::ratePost(int postId, int change) {
-    // Basic validation to ensure change is only 1 or -1
     if (change > 1) change = 1;
     if (change < -1) change = -1;
 

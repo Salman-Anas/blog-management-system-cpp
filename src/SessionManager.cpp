@@ -3,9 +3,9 @@
 #include <cstdlib>
 #include <ctime>
 #include <sstream>
-#include <cgicc/CgiEnvironment.h> // Required for getCookieList()
+#include <cgicc/CgiEnvironment.h> 
 
-using namespace cgicc; // Make sure we can use const_cookie_iterator
+using namespace cgicc;
 
 SessionManager::SessionManager(Database* database) {
     this->db = database;
@@ -26,12 +26,8 @@ string SessionManager::generateSessionId() {
 
 HTTPCookie SessionManager::createSession(int userId) {
     string token = generateSessionId();
-    
-    // Store in Database
     string query = "INSERT INTO sessions (session_token, user_id) VALUES ('" + token + "', " + to_string(userId) + ")";
     db->execute(query);
-
-    // Create the cookie
     HTTPCookie cookie("BLOG_SESSION", token);
     cookie.setMaxAge(SESSION_TIMEOUT);
     cookie.setPath("/");
@@ -40,47 +36,35 @@ HTTPCookie SessionManager::createSession(int userId) {
 }
 
 int SessionManager::checkSession(const Cgicc& cgi) {
-    // FIX: Access cookies via getEnvironment()
     const CgiEnvironment& env = cgi.getEnvironment();
     const_cookie_iterator iter = env.getCookieList().begin();
     string token = "";
-    
     for (; iter != env.getCookieList().end(); ++iter) {
         if (iter->getName() == "BLOG_SESSION") {
             token = iter->getValue();
             break;
         }
     }
-
     if (token.empty()) return 0; 
-
     string cleanToken = db->sanitize(token);
-    
-    // Check DB for validity and timeout
     string query = "SELECT user_id, TIMESTAMPDIFF(SECOND, last_activity, NOW()) as inactivity FROM sessions WHERE session_token = '" + cleanToken + "'";
-    
+
     MYSQL_RES* res = db->select(query);
     if (!res) return 0;
-
     MYSQL_ROW row = mysql_fetch_row(res);
     if (!row) return 0;
-
     int userId = stoi(row[0]);
     int inactivity = stoi(row[1]);
-
     if (inactivity > SESSION_TIMEOUT) {
         destroySession(cgi);
         return 0;
     }
-
-    // Update activity
     db->execute("UPDATE sessions SET last_activity = NOW() WHERE session_token = '" + cleanToken + "'");
 
     return userId;
 }
 
-void SessionManager::destroySession(const Cgicc& cgi) {
-    // FIX: Access cookies via getEnvironment()
+void SessionManager::destroySession(const Cgicc& cgi){
     const CgiEnvironment& env = cgi.getEnvironment();
     const_cookie_iterator iter = env.getCookieList().begin();
 

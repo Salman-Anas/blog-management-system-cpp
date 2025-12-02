@@ -12,8 +12,6 @@ int main() {
     Database db;
     db.connect();
     SessionManager session(&db);
-
-    // SR2: Destroy session in DB and redirect to login
     session.destroySession(cgi);
 
     cout << HTTPRedirectHeader("login.cgi") << endl;

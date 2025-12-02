@@ -1,6 +1,6 @@
 #include "../include/User.h"
 #include <iostream>
-#include <fstream> // <--- This was missing or incomplete
+#include <fstream> 
 #include <iomanip>
 #include <sstream>
 #include <openssl/evp.h>
@@ -13,8 +13,6 @@ User::User(Database* database) {
 }
 
 User::~User() {}
-
-// SR5: Modern SHA256 Hashing Implementation (OpenSSL 3.0 Compatible)
 string User::hashPassword(string password) {
     unsigned char hash[EVP_MAX_MD_SIZE];
     unsigned int lengthOfHash = 0;
@@ -40,20 +38,15 @@ string User::hashPassword(string password) {
 int User::authenticate(string inputUsername, string inputPassword) {
     string cleanUser = db->sanitize(inputUsername);
     string hashedPassword = hashPassword(inputPassword);
-
     string query = "SELECT id, email, role FROM users WHERE username = '" + cleanUser + "' AND password_hash = '" + hashedPassword + "'";
-    
     MYSQL_RES* res = db->select(query);
     if (!res) return 0;
-
     MYSQL_ROW row = mysql_fetch_row(res);
     if (!row) return 0;
-
     this->id = stoi(row[0]);
     this->email = row[1];
     this->role = row[2];
     this->username = cleanUser;
-
     return this->id;
 }
 
@@ -61,10 +54,8 @@ bool User::load(int userId) {
     string query = "SELECT username, email, role FROM users WHERE id = " + to_string(userId);
     MYSQL_RES* res = db->select(query);
     if (!res) return false;
-
     MYSQL_ROW row = mysql_fetch_row(res);
     if (!row) return false;
-
     this->id = userId;
     this->username = row[0];
     this->email = row[1];
@@ -73,7 +64,6 @@ bool User::load(int userId) {
     return true;
 }
 
-// FR3: Create User
 bool User::createUser(string username, string password, string email, string role) {
     string cleanUser = db->sanitize(username);
     string cleanEmail = db->sanitize(email);
@@ -87,15 +77,11 @@ bool User::createUser(string username, string password, string email, string rol
     return db->execute(query);
 }
 
-// SR7: Set 2FA Code and simulate email
 void User::set2FACode(int userId, string code) {
-    // 1. Save code to Database
     string cleanCode = db->sanitize(code);
     string query = "UPDATE users SET two_factor_code = '" + cleanCode + "' WHERE id = " + to_string(userId);
     db->execute(query);
-
-    // 2. Simulate Email
-    load(userId); // Load email address first
+    load(userId);
     
     ofstream mailSpool("/tmp/email_log.txt", ios::app);
     if (mailSpool.is_open()) {
@@ -108,7 +94,6 @@ void User::set2FACode(int userId, string code) {
     }
 }
 
-// SR7: Verify 2FA Code
 bool User::verify2FACode(int userId, string inputCode) {
     string cleanCode = db->sanitize(inputCode);
     string query = "SELECT id FROM users WHERE id = " + to_string(userId) + " AND two_factor_code = '" + cleanCode + "'";
