@@ -24,6 +24,8 @@ public:
     vector<BlogPost> getAllPosts();
     void ratePost(int postId, int change);
     bool createPost(int userId, string title, string content);
+    BlogPost getPostById(int postId);
+    bool updatePost(int postId, int userId, string title, string content);
 };
 
 #endif

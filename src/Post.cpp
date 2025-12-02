@@ -48,3 +48,30 @@ bool Post::createPost(int userId, string title, string content) {
     
     return db->execute(query);
 }
+
+BlogPost Post::getPostById(int postId) {
+    BlogPost p;
+    p.id = 0; 
+
+    string query = "SELECT id, title, content, user_id FROM posts WHERE id = " + to_string(postId);
+    MYSQL_RES* res = db->select(query);
+    if (!res) return p;
+
+    MYSQL_ROW row = mysql_fetch_row(res);
+    if (row) {
+        p.id = stoi(row[0]);
+        p.title = row[1];
+        p.content = row[2];
+        p.rating = stoi(row[3]); 
+    }
+    return p;
+}
+
+bool Post::updatePost(int postId, int userId, string title, string content) {
+    string cleanTitle = db->sanitize(title);
+    string cleanContent = db->sanitize(content);
+    string query = "UPDATE posts SET title = '" + cleanTitle + "', content = '" + cleanContent + 
+                   "' WHERE id = " + to_string(postId) + " AND user_id = " + to_string(userId);
+    
+    return db->execute(query);
+}

@@ -62,20 +62,16 @@ int main() {
         for (const auto& post : posts) {
             cout << cgicc::div().set("class", "post") << endl;
             cout << cgicc::div().set("class", "rating") << endl;
-            cout << "Rating: " << post.rating << br();        
-            cout << form().set("method", "post").set("action", "dashboard.cgi").set("style", "display:inline;") << endl;
-            cout << input().set("type", "hidden").set("name", "post_id").set("value", to_string(post.id));
-            cout << input().set("type", "submit").set("name", "action").set("value", "up").set("class", "btn");
-            cout << form() << endl;
-            cout << form().set("method", "post").set("action", "dashboard.cgi").set("style", "display:inline;") << endl;
-            cout << input().set("type", "hidden").set("name", "post_id").set("value", to_string(post.id));
-            cout << input().set("type", "submit").set("name", "action").set("value", "down").set("class", "btn");
-            cout << form() << endl;
-            cout << cgicc::div() << endl;
+            cout << "Rating: " << post.rating << br();
+            cout << cgicc::div() << endl; 
             cout << h2(post.title) << endl;
             cout << cgicc::p("By: " + post.author) << endl;
             cout << cgicc::p(post.content) << endl;
+            cout << cgicc::div().set("style", "margin-top:10px;") << endl;
+            cout << a("Edit This Post").set("href", "edit_post.cgi?id=" + to_string(post.id)).set("class", "btn").set("style", "background:#ddd; color:black; text-decoration:none;") << endl;
             cout << cgicc::div() << endl;
+            
+            cout << cgicc::div() << endl; 
         }
     }
     cout << body() << html() << endl;

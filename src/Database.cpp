@@ -1,7 +1,7 @@
 #include "../include/Database.h"
 #include <iostream>
 #include <cstring>
-#include <std>
+using namespace std;
 
 Database::Database() {
     conn = mysql_init(NULL);
